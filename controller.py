@@ -36,12 +36,16 @@ class ValveController(Daemon):
 
         while True:
 
+            time.sleep(5)
+
             if (next_event == None):
                 current_event = _get_next_event()
 
             if (cmp(current_event, NULL_EVENT) != 0):
                 run_time = int(current_event['duration']) * 60
                 valve_id = _open_valve(current_event['valve'])
+            else:
+                run_time = 0
 
                 while run_time > 0:
                     run_time = run_time - 5
@@ -59,5 +63,4 @@ class ValveController(Daemon):
                         next_event == priority_event
                         break
         
-            time.sleep(5)
 
