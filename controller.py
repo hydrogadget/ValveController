@@ -2,7 +2,7 @@ import sys, time
 from daemon import Daemon
 import requests
 
-TASK_SERVICE_URL = 'http://localhost:5000/next/priority'
+TASK_SERVICE_URL = 'http://localhost:5000'
 CHECK_FOR_NEW_EVENTS_INTERVAL = 5
 NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
 
@@ -12,20 +12,23 @@ MANUAL_RUN_COMMAND = 2
 __all__ = ['ValveController']
 
 def _get_next_priority_event():
-    pass
+    r = requests.post(TASK_SERVICE_URL + '/next/priority')
+    return r.json()
 
 def _get_next_event():
+    r = requests.post(TASK_SERVICE_URL + '/next/event')
+    return r.json()
+    
+def _open_valve(valve_id=None):
     pass
 
-def _open_valve():
+def _close_valve(valve_id=None):
     pass
 
-def _close_valve():
+def _close_all_valves():
     pass
 
 class ValveController(Daemon):
-    def __init__(self):
-        pass
 
     def run(self):
 
@@ -36,8 +39,8 @@ class ValveController(Daemon):
             if (next_event == None):
                 current_event = _get_next_event()
 
-            if (current_event != NULL_EVENT):
-                run_time = int(x['duration']) * 60
+            if (cmp(current_event, NULL_EVENT) != 0):
+                run_time = int(current_event['duration']) * 60
                 valve_id = _open_valve(current_event['valve'])
 
                 while run_time > 0:
@@ -46,11 +49,11 @@ class ValveController(Daemon):
                     priority_event = _get_next_priority_event()
 
                     # Continue as normal
-                    if (priority_event == NULL_EVENT):
+                    if (cmp(priority_event, NULL_EVENT) == 0):
                         next_event = None
 
                     # Need to interrupt the current event
-                    if (priority_event != NULL_EVENT):
+                    if (cmp(priority_event, NULL_EVENT) != 0):
                         valve_id = _close_valve(current_event)
                         current_event = priority_event
                         next_event == priority_event
