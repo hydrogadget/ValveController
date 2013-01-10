@@ -58,4 +58,6 @@ class ValveController(Daemon):
                         current_event = priority_event
                         next_event == priority_event
                         break
+        
+            time.sleep(5)
 
