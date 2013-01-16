@@ -2,6 +2,8 @@ import sys, time
 from daemon import Daemon
 import requests
 
+MOCK_RPI = True
+
 TASK_SERVICE_URL = 'http://localhost:5000'
 CHECK_FOR_NEW_EVENTS_INTERVAL = 5
 NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
@@ -20,10 +22,16 @@ def _get_next_event():
     return r.json()
     
 def _open_valve(valve_id=None):
-    pass
+
+    if MOCK_RPI:
+        print "Valve " + repr(valve_id) + " is open..."
+        return
 
 def _close_valve(valve_id=None):
-    pass
+
+    if MOCK_RPI:
+        print "Valve " + repr(valve_id) + " is closed..."
+        return
 
 def _close_all_valves():
     pass
