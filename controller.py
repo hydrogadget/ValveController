@@ -5,11 +5,11 @@ import requests
 MOCK_RPI = True
 
 TASK_SERVICE_URL = 'http://localhost:5000'
-CHECK_FOR_NEW_EVENTS_INTERVAL = 5
-NULL_EVENT = {'valve':0,'duration':0,'start_time':0,'command':0}
+NULL_EVENT = {'valve':None,'duration':None,'start_time':None,'command':None}
 
 STOP_COMMAND = 1
 MANUAL_RUN_COMMAND = 2
+SLEEP_DURATION = 5
 
 __all__ = ['ValveController']
 
@@ -23,20 +23,26 @@ def _get_next_event():
     
 def _open_valve(valve_id=None):
 
+    if valve_id == None:
+        return
+
     if MOCK_RPI:
         print "Valve " + repr(valve_id) + " is open..."
-        return
+        return valve_id
 
 def _close_valve(valve_id=None):
 
+    if valve_id == None:
+        return
+
     if MOCK_RPI:
         print "Valve " + repr(valve_id) + " is closed..."
-        return
+        return valve_id
 
 def _close_all_valves():
     pass
 
-class ValveController(Daemon):
+class ValveController(object):
 
     def run(self):
 
@@ -44,31 +50,51 @@ class ValveController(Daemon):
 
         while True:
 
-            time.sleep(5)
+            time.sleep(SLEEP_DURATION)
 
             if (next_event == None):
-                current_event = _get_next_event()
+                current_event = _get_next_priority_event()
+                print "if stmt 1: " + repr(current_event)
 
-            if (cmp(current_event, NULL_EVENT) != 0):
+                if (cmp(current_event,NULL_EVENT) == 0):
+                    current_event = None
+            
+            if (current_event == None):
+                current_event = _get_next_event()
+                print "if stmt 2: " + repr(current_event)
+
+            if (cmp(current_event, NULL_EVENT) != 0 and current_event['duration'] != 0):
+                print "if stmt 3: " + repr(current_event)
                 run_time = int(current_event['duration']) * 60
                 valve_id = _open_valve(current_event['valve'])
             else:
                 run_time = 0
+                
+            while run_time > 0:
+                print "entering runloop and running for " + str(run_time)
+                run_time = run_time - SLEEP_DURATION
+                time.sleep(SLEEP_DURATION)
+                priority_event = _get_next_priority_event()
 
-                while run_time > 0:
-                    run_time = run_time - 5
-                    time.sleep(5)
-                    priority_event = _get_next_priority_event()
+                # Continue as normal
+                if (cmp(priority_event, NULL_EVENT) == 0):
+                    next_event = None
+                    print "continue as normal schedule"
 
-                    # Continue as normal
-                    if (cmp(priority_event, NULL_EVENT) == 0):
-                        next_event = None
+                # Need to interrupt the current event
+                if (cmp(priority_event, NULL_EVENT) != 0):
+                    print "interrupting current schedule"
+                    valve_id = _close_valve(current_event['valve'])
+                    current_event = priority_event
+                    next_event = priority_event
+                    break
+            else:
+                valve_id = _close_valve(current_event['valve'])
+                next_event = None
+                current_event = None
 
-                    # Need to interrupt the current event
-                    if (cmp(priority_event, NULL_EVENT) != 0):
-                        valve_id = _close_valve(current_event)
-                        current_event = priority_event
-                        next_event == priority_event
-                        break
-        
+if __name__ == "__main__":
+    x = ValveController()
+    x.run()
+
 
