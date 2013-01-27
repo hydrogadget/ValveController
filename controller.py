@@ -1,10 +1,15 @@
-import sys, time
 from daemon import Daemon
 import requests
 
-MOCK_RPI = True
+import sys,time
 
-TASK_SERVICE_URL = 'http://localhost:5000'
+try:
+    import RPi.GPIO as GPIO
+    MOCK_RPI = False
+except ImportError:
+    MOCK_RPI = True
+
+TASK_SERVICE_URL = 'http://localhost:8000'
 NULL_EVENT = {'valve':None,'duration':None,'start_time':None,'command':None}
 
 STOP_COMMAND = 1
@@ -12,6 +17,19 @@ MANUAL_RUN_COMMAND = 2
 SLEEP_DURATION = 5
 
 __all__ = ['ValveController']
+
+VALVES = [1,2,3,4]
+
+def _setup(valves=[]):
+
+    GPIO.setmode(GPIO.BCM)
+
+    for valve in valves:
+        GPIO.setup(valve, GPIO.OUT)
+        close(valve)
+
+def _cleanup():
+    GPIO.cleanup()
 
 def _get_next_priority_event():
     r = requests.post(TASK_SERVICE_URL + '/next/priority')
@@ -29,6 +47,9 @@ def _open_valve(valve_id=None):
     if MOCK_RPI:
         print "Valve " + repr(valve_id) + " is open..."
         return valve_id
+    
+    GPIO.output(valve_id, True)
+    return valve_ud
 
 def _close_valve(valve_id=None):
 
@@ -39,12 +60,17 @@ def _close_valve(valve_id=None):
         print "Valve " + repr(valve_id) + " is closed..."
         return valve_id
 
+    GPIO.output(valve_id, False)
+    return valve_id
+
 def _close_all_valves():
     pass
 
 class ValveController(object):
 
     def run(self):
+
+        valve_setup(VALVES)
 
         next_event = None
 
