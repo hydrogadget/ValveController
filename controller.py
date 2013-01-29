@@ -22,6 +22,9 @@ VALVES = [1,2,3,4]
 
 def _valve_setup(valves=[]):
 
+    if MOCK_RPI:
+        return
+
     GPIO.setmode(GPIO.BCM)
 
     for valve in valves:
