@@ -18,7 +18,7 @@ SLEEP_DURATION = 5
 
 __all__ = ['ValveController']
 
-VALVES = [1,2,3,4]
+VALVES = [17,18,22,24]
 
 def _setup(valves=[]):
 
@@ -48,7 +48,7 @@ def _open_valve(valve_id=None):
         print "Valve " + repr(valve_id) + " is open..."
         return valve_id
     
-    GPIO.output(valve_id, True)
+    GPIO.output(valve_id, False)
     return valve_ud
 
 def _close_valve(valve_id=None):
@@ -60,7 +60,7 @@ def _close_valve(valve_id=None):
         print "Valve " + repr(valve_id) + " is closed..."
         return valve_id
 
-    GPIO.output(valve_id, False)
+    GPIO.output(valve_id, True)
     return valve_id
 
 def _close_all_valves():
@@ -122,5 +122,4 @@ class ValveController(object):
 if __name__ == "__main__":
     x = ValveController()
     x.run()
-
 
