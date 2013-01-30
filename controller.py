@@ -9,7 +9,7 @@ try:
 except ImportError:
     MOCK_RPI = True
 
-TASK_SERVICE_URL = 'http://localhost:8000'
+TASK_SERVICE_URL = 'http://localhost:5000'
 NULL_EVENT = {'valve':None,'duration':None,'start_time':None,'command':None}
 
 STOP_COMMAND = 1
@@ -20,13 +20,16 @@ __all__ = ['ValveController']
 
 VALVES = [17,18,22,24]
 
-def _setup(valves=[]):
+def _valve_setup(valves=[]):
+
+    if MOCK_RPI:
+        return
 
     GPIO.setmode(GPIO.BCM)
 
     for valve in valves:
         GPIO.setup(valve, GPIO.OUT)
-        close(valve)
+        _close_valve(valve)
 
 def _cleanup():
     GPIO.cleanup()
@@ -66,11 +69,11 @@ def _close_valve(valve_id=None):
 def _close_all_valves():
     pass
 
-class ValveController(object):
+class ValveController(Daemon):
 
     def run(self):
 
-        valve_setup(VALVES)
+        _valve_setup(VALVES)
 
         next_event = None
 
