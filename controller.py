@@ -35,13 +35,19 @@ def _cleanup():
     GPIO.cleanup()
 
 def _get_next_priority_event():
-    r = requests.post(TASK_SERVICE_URL + '/next/priority')
-    return r.json()
+    try:
+        r = requests.post(TASK_SERVICE_URL + '/next/priority')
+        return r.json()
+    except (requests.ConnectionError, requests.HTTPError):
+        pass
 
 def _get_next_event():
-    r = requests.post(TASK_SERVICE_URL + '/next/event')
-    return r.json()
-    
+    try:
+        r = requests.post(TASK_SERVICE_URL + '/next/event')
+        return r.json()
+    except (requests.ConnectionError, requests.HTTPError):
+        pass
+
 def _open_valve(valve_id=None):
 
     if valve_id == None:
