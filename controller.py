@@ -1,7 +1,7 @@
 from daemon import Daemon
 import requests
 
-import sys,time
+import sys, time, json
 
 try:
     import RPi.GPIO as GPIO
@@ -33,6 +33,11 @@ def _valve_setup(valves=[]):
 
 def _cleanup():
     GPIO.cleanup()
+
+def _nullify_current_event():
+    
+    d = {}
+    r = requests.post(TASK_SERVICE_URL + "/set/current/event", data=d)
 
 def _get_next_priority_event():
     try:
@@ -75,7 +80,7 @@ def _close_valve(valve_id=None):
 def _close_all_valves():
     pass
 
-class ValveController(Daemon):
+class ValveController(object):
 
     def run(self):
 
@@ -125,6 +130,7 @@ class ValveController(Daemon):
                     break
             else:
                 valve_id = _close_valve(current_event['valve'])
+                _nullify_current_event()
                 next_event = None
                 current_event = None
 
