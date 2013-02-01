@@ -18,9 +18,9 @@ SLEEP_DURATION = 5
 
 __all__ = ['ValveController']
 
-VALVES = [17,18,22,24]
+VALVES = [0,17,18,22,23]
 
-def _valve_setup(valves=[]):
+def _valve_setup(valves=[17,18,22,23]):
 
     if MOCK_RPI:
         return
@@ -54,11 +54,11 @@ def _open_valve(valve_id=None):
         return
 
     if MOCK_RPI:
-        print "Valve " + repr(valve_id) + " is open..."
-        return valve_id
+        print "Valve " + repr(VALVES[valve_id]) + " is open..."
+        return VALVES[valve_id]
     
-    GPIO.output(valve_id, False)
-    return valve_ud
+    GPIO.output(VALVES[valve_id], True)
+    return VALVES[valve_ud]
 
 def _close_valve(valve_id=None):
 
@@ -66,11 +66,11 @@ def _close_valve(valve_id=None):
         return
 
     if MOCK_RPI:
-        print "Valve " + repr(valve_id) + " is closed..."
-        return valve_id
+        print "Valve " + repr(VALVES[valve_id]) + " is closed..."
+        return VALVES[valve_id]
 
-    GPIO.output(valve_id, True)
-    return valve_id
+    GPIO.output(VALVES[valve_id], False)
+    return VALVES[valve_id]
 
 def _close_all_valves():
     pass
@@ -79,7 +79,7 @@ class ValveController(Daemon):
 
     def run(self):
 
-        _valve_setup(VALVES)
+        _valve_setup()
 
         next_event = None
 
