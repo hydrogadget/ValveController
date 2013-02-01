@@ -29,7 +29,11 @@ def _valve_setup(valves=[17,18,22,23]):
 
     for valve in valves:
         GPIO.setup(valve, GPIO.OUT)
-        _close_valve(valve)
+ 
+    _close_valve(1)
+    _close_valve(2)
+    _close_valve(3)
+    _close_valve(4)
 
 def _cleanup():
     GPIO.cleanup()
@@ -63,7 +67,7 @@ def _open_valve(valve_id=None):
         return VALVES[valve_id]
     
     GPIO.output(VALVES[valve_id], True)
-    return VALVES[valve_ud]
+    return VALVES[valve_id]
 
 def _close_valve(valve_id=None):
 
@@ -80,7 +84,7 @@ def _close_valve(valve_id=None):
 def _close_all_valves():
     pass
 
-class ValveController(object):
+class ValveController(Daemon):
 
     def run(self):
 
