@@ -18,9 +18,9 @@ SLEEP_DURATION = 5
 
 __all__ = ['ValveController']
 
-VALVES = [0,17,18,22,23]
+VALVES = [0,24,23,22,18]
 
-def _valve_setup(valves=[17,18,22,23]):
+def _valve_setup(valves=[24,23,22,18]):
 
     if MOCK_RPI:
         return
